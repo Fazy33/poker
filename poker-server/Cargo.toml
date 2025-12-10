@@ -1,0 +1,16 @@
+[package]
+name = "poker-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+poker-engine = { path = "../poker-engine" }
+actix-web = "4.4"
+actix-ws = "0.2"
+actix-files = "0.6"
+tokio = { version = "1.35", features = ["full"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { version = "1.6", features = ["v4", "serde"] }
+jsonwebtoken = "9.2"
+chrono = { version = "0.4", features = ["serde"] }

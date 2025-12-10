@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4SH Poker - Live Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container expanded">
+        <header class="main-header">
+            <div class="brand-section">
+                <h1>🎮 4SH Poker</h1>
+            </div>
+
+            <!-- Contrôles globaux déplacés dans le header -->
+            <div class="header-controls" id="headerControls" style="display: none;">
+                <button class="btn btn-primary" id="startGameBtn">🎮 Démarrer</button>
+                <button class="btn btn-success" id="joinGameDirectBtn">🎮 Rejoindre</button>
+                <button class="btn btn-secondary" id="addBotBtn">🤖 Bot</button>
+                <button class="btn btn-secondary" id="copyGameIdBtn">📋 ID</button>
+                <button class="btn btn-secondary" id="backToLobbyBtn">⬅️ Sortir</button>
+            </div>
+        </header>
+
+        <!-- Barre d'infos de la partie (juste sous le header) -->
+        <div id="gameInfoBar" class="game-info-bar" style="display: none;">
+            <div class="info-item"><strong>Phase:</strong> <span id="gamePhase">-</span></div>
+            <div class="info-item"><strong>Pot:</strong> <span id="gamePot">0</span></div>
+            <div class="info-item"><strong>Mise:</strong> <span id="currentBet">0</span></div>
+        </div>
+
+        <!-- Section de sélection/création de partie -->
+        <div id="lobby" class="section">
+            <h2>Parties Disponibles</h2>
+            <div class="controls">
+                <button id="createGameBtn" class="btn btn-primary">Créer une Partie</button>
+                <button id="joinAsPlayerBtn" class="btn btn-success">🎮 Rejoindre comme Joueur</button>
+                <button id="refreshBtn" class="btn btn-secondary">Rafraîchir</button>
+            </div>
+            <div id="gamesList" class="games-list">
+                <!-- Liste des parties sera insérée ici -->
+            </div>
+        </div>
+
+        <!-- Formulaire de création de partie -->
+        <div id="createGameForm" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>Créer une Nouvelle Partie</h2>
+                <form id="newGameForm">
+                    <div class="form-group">
+                        <label>Nom de la partie:</label>
+                        <input type="text" id="gameName" value="Partie de Poker" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Joueurs max:</label>
+                        <input type="number" id="maxPlayers" value="6" min="2" max="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jetons de départ:</label>
+                        <input type="number" id="startingChips" value="1000" min="100" step="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Small Blind:</label>
+                        <input type="number" id="smallBlind" value="10" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Big Blind:</label>
+                        <input type="number" id="bigBlind" value="20" min="2" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Créer</button>
+                        <button type="button" id="cancelCreateBtn" class="btn btn-secondary">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Vue de jeu -->
+        <div id="gameView" style="display: none;">
+            <div class="game-layout">
+                <!-- Contenu principal -->
+                <div class="game-main">
+                    <!-- Ancienne game-header supprimée, remplacée par le header global + info bar -->
+
+                    <div class="poker-table">
+                        <div class="table-felt">
+                            <div id="tablePhaseDisplay" class="phase-display">EN ATTENTE</div>
+                            <div class="community-cards" id="communityCards">
+                                <div style="color: rgba(255,255,255,0.5);">En attente...</div>
+                            </div>
+                            <div class="pot-display">
+                                💰 <span id="potDisplay">0</span>
+                            </div>
+                            <div class="players-container" id="playersContainer">
+                                <!-- Joueurs générés dynamiquement -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contrôles pour joueur humain -->
+                    <div id="humanPlayerControls" class="human-controls" style="display: none;">
+                        <div class="player-info-section">
+                            <h3>Vos Cartes</h3>
+                            <div id="humanPlayerCards" class="player-hand">
+                                <!-- Cartes du joueur affichées ici -->
+                            </div>
+                            <div class="player-stats">
+                                <span id="humanPlayerChips">💰 0 jetons</span>
+                            </div>
+                        </div>
+
+                        <div class="action-controls">
+                            <h3>Actions</h3>
+                            <div class="action-buttons">
+                                <button id="foldBtn" class="btn btn-danger">Fold (Se coucher)</button>
+                                <button id="checkBtn" class="btn btn-secondary" style="display: none;">Check</button>
+                                <button id="callBtn" class="btn btn-primary" style="display: none;">Call (<span
+                                        id="callAmount">0</span>)</button>
+                                <div class="raise-controls" style="display: none;">
+                                    <input type="number" id="raiseAmount" min="0" step="10" placeholder="Montant">
+                                    <button id="raiseBtn" class="btn btn-warning">Raise</button>
+                                </div>
+                                <button id="allinBtn" class="btn btn-danger">All-in</button>
+                            </div>
+                            <div id="actionMessage" class="action-message"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panneau latéral droit pour l'historique -->
+                <div class="sidebar-right collapsed" id="actionLogSidebar">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <span class="toggle-icon">◀</span>
+                    </button>
+                    <div class="sidebar-content">
+                        <h3>📋 Historique des Actions</h3>
+                        <div class="log-content" id="actionLog">
+                            <!-- Logs générés dynamiquement -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions API -->
+    <div class="section api-info">
+        <h2>📡 API pour Bots</h2>
+        <p>Connectez vos bots via l'API REST:</p>
+        <div class="code-block">
+            <code>POST http://localhost:8080/api/games/{game_id}/join</code>
+        </div>
+        <p>Documentation complète: <a href="/docs/API.md" target="_blank">API.md</a></p>
+    </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>

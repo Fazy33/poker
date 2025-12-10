@@ -1,0 +1,24 @@
+# Build artifacts
+target/
+**/*.rs.bk
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+
+# Other projects in the repo that aren't needed for the server build
+# (We copy everything in Dockerfile, but we can exclude the java bot and examples to save build context size)
+java-bot/
+examples/
+docs/
+
+# Local scripts
+*.sh
